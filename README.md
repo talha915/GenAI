@@ -1,0 +1,2 @@
+# GenAI
+GenAi Course (diceCamp)
