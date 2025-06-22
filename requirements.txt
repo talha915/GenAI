@@ -2,3 +2,6 @@ langChain
 langchain_community
 pypdf
 sentence-transformers
+pinecone-client==5.0.1
+tiktoken
+langchain_chroma
