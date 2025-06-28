@@ -3,7 +3,8 @@ from langchain_community.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.llms import HuggingFaceHub
+from langchain_groq import ChatGroq
+
 from langchain.chains import RetrievalQA
 
 
@@ -17,7 +18,8 @@ env_path = Path(__file__).resolve().parent / '.env'
 
 # Load .env from parent directory
 load_dotenv(dotenv_path=env_path)
-# print(grok_api_token)
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
+os.environ["GROQ_API_KEY"] = os.getenv("grok_api_key")
 
 # file_path = "filename.pdf"
 # loader = PyPDFLoader(file_path)
@@ -45,9 +47,12 @@ vectorstore.save_local("faiss_index")
 
 retriever = vectorstore.as_retriever(search_kwargs={"k": 5})  # top 5 relevant docs
 
-llm = HuggingFaceHub(repo_id="google/flan-t5-base", model_kwargs={"temperature":0, "max_length":256})
+groqllm = ChatGroq(
+    temperature=0,
+    model_name="gpt-3.5-turbo"
+)
 
-qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type="stuff")
+qa_chain = RetrievalQA.from_chain_type(llm=groqllm, retriever=retriever, chain_type="stuff")
 
 query = "What is generative AI?"
 answer = qa_chain.run(query)
