@@ -49,7 +49,7 @@ retriever = vectorstore.as_retriever(search_kwargs={"k": 5})  # top 5 relevant d
 
 groqllm = ChatGroq(
     temperature=0,
-    model_name="gpt-3.5-turbo"
+    model_name="llama3-70b-8192"
 )
 
 qa_chain = RetrievalQA.from_chain_type(llm=groqllm, retriever=retriever, chain_type="stuff")
