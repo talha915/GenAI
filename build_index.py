@@ -16,7 +16,7 @@ class BuildRag:
             texts = text_splitter.split_documents(docs)
             return texts
         except Exception as e:
-            print(f"Error while loading documents: {e}")
+            print(f"❌ Error while loading documents: {e}")
             raise e        
 
     def embedding_vector_store(self, texts):
@@ -27,7 +27,7 @@ class BuildRag:
             print("✅ FAISS index saved.")
 
         except Exception as e:
-            print(f"Error while creating embeddings and vector store {e}")
+            print(f"❌ Error while creating embeddings and vector store {e}")
             raise e
         
 if __name__ == '__main__':
