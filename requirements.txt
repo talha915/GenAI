@@ -5,3 +5,4 @@ sentence-transformers
 pinecone-client==5.0.1
 tiktoken
 langchain_chroma
+langchain-huggingface

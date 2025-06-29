@@ -1,5 +1,5 @@
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain.chains import RetrievalQA
 import os
@@ -8,6 +8,9 @@ from pathlib import Path
 
 env_path = Path(__file__).resolve().parent / '.env'
 load_dotenv(dotenv_path=env_path)
+
+os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
+os.environ["GROQ_API_KEY"] = os.getenv("grok_api_key")
 
 embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
