@@ -54,6 +54,6 @@ groqllm = ChatGroq(
 
 qa_chain = RetrievalQA.from_chain_type(llm=groqllm, retriever=retriever, chain_type="stuff")
 
-query = "What is generative AI?"
-answer = qa_chain.run(query)
+query = "What are key aspects of generative AI?"
+answer = qa_chain.invoke(query)
 print("Answer:", answer)
