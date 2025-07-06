@@ -3,6 +3,9 @@ from fastapi.responses import JSONResponse
 import os
 import uuid
 
+# Importing classes
+from build_index import BuildRag
+
 app = FastAPI()
 upload_directory = "documents"
 
@@ -46,8 +49,12 @@ async def upload_file(file: UploadFile = File(...)):
         with open(file_path, "wb") as f:
             f.write(await file.read())
 
+        build_instance = BuildRag()
+        texts = build_instance.load_documents(upload_directory)
+        build_instance.embedding_vector_store(texts)    
+
         return JSONResponse(content={
-            "message": "✅ File uploaded successfully.",
+            "message": "✅ File uploaded and ingested in vector store successfully.",
             "filename": file.filename,
             "path": file_path
         })    
