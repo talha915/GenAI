@@ -1,8 +1,14 @@
-langChain
+langchain
 langchain_community
 pypdf
 sentence-transformers
 pinecone-client==5.0.1
 tiktoken
 langchain_chroma
+fastapi
+uvicorn
 langchain-huggingface
+pydantic
+python-dotenv
+langchain-huggingface
+
