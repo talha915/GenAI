@@ -11,7 +11,7 @@ class RAGQueryEngine:
     def __init__(self, index_path="faiss_index"):
         try:
             # Load .env variables
-            env_path = Path(__file__).resolve().parent / '.env'
+            env_path = Path(__file__).resolve().parent.parent.parent / '.env'
             load_dotenv(dotenv_path=env_path)
 
             os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HUGGINGFACEHUB_API_TOKEN")
