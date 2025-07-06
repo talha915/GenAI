@@ -1,10 +1,10 @@
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException, APIRouter
+from fastapi import Form, HTTPException, APIRouter
 from fastapi.responses import JSONResponse
-import os
 
 # Importing classes
 from app.core.query import RAGQueryEngine
 
+# Router
 router = APIRouter()
 
 # POST endpoint to query Pinecone (form-data version)
@@ -15,6 +15,8 @@ async def query_vectorstore(query: str = Form(...)):
             raise HTTPException(
                 status_code=400, detail="Missing 'query' in request body"
             )
+        
+        print(f"[DEBUG] Received query: {query!r}")
 
         # Set up QA chain
         engine = RAGQueryEngine()
