@@ -10,3 +10,5 @@ uvicorn
 langchain-huggingface
 pydantic
 python-dotenv
+langchain-huggingface
+
