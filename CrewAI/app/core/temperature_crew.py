@@ -137,7 +137,6 @@ if __name__ == "__main__":
     final_result = crew_result.kickoff()
     # Output for now
     print("\n📦 Final Weather Info:\n", weather_data['messages'][-1])
-    # print("\n🤖 Weather Info Agent:\n", final_result)
-    for task_description, result in final_result.results:
-        print(f"\n📝 Task: {task_description}\n💡 Output: {result}")
+    print("\n🤖 Weather Info Agent:\n", final_result)
+    
 
