@@ -49,6 +49,17 @@ class TemperatureCrewBuilder:
             llm=self.llm
         )
     
+    def _agent_clothes_researcher(self, available_info):
+        return Agent(
+            role='Researcher',
+            goal=(
+                "Provide concise information about weather for both genders for foreigners who visiting first time.\n"
+                f"Available information: {available_info}"
+            ),
+            backstory='An expert clothes suggester with 10 years of experience.',
+            llm=self.llm
+        )
+    
     def _weather_info_task(self, user_input, weather_data):
         weather_info_extracter_agent = self._agent_weather_info(user_input, weather_data['messages'][-1])
         return Task(
@@ -56,13 +67,23 @@ class TemperatureCrewBuilder:
             expected_output="A short summary (2-3 lines) describing the current weather conditions in the specified city.",
             agent=weather_info_extracter_agent
         )
+    
+    def _clothes_suggester_task(self, available_info, weather_task):
+        clothes_agent = self._agent_clothes_researcher(available_info)
+        return Task(
+            description="Suggest clothes based on weather for first-time male and female foreign visitors.",
+            expected_output="Clothing suggestions (2-3 lines) for both genders, based on weather.",
+            agent=clothes_agent,
+            context=[weather_task]
+        )
 
-    def _assemble_crew(self):
-        weather_agent = self._agent_weather_info(user_input, weather_data)
+    def _assemble_crew(self, user_input, weather_data):
         weather_task = self._weather_info_task(user_input, weather_data)
+        clothes_task = self._clothes_suggester_task(weather_data['messages'][-1], weather_task)
+
         return Crew(
-            agents=[weather_agent],
-            tasks=[weather_task],
+            agents=[weather_task.agent, clothes_task.agent],
+            tasks=[weather_task, clothes_task],
             verbose=True
         )
 
@@ -112,8 +133,11 @@ if __name__ == "__main__":
     weather_data = crew_runner._fetch_weather(updated_state)
 
    
-    crew_result = crew_runner._assemble_crew()    
+    crew_result = crew_runner._assemble_crew(user_input, weather_data)    
     final_result = crew_result.kickoff()
     # Output for now
     print("\n📦 Final Weather Info:\n", weather_data['messages'][-1])
-    print("\n🤖 Weather Info Agent:\n", final_result)
+    # print("\n🤖 Weather Info Agent:\n", final_result)
+    for task_description, result in final_result.results:
+        print(f"\n📝 Task: {task_description}\n💡 Output: {result}")
+
