@@ -6,3 +6,4 @@ langchain-groq
 Pandas
 crewai[tools]
 python-dotenv
+pyowm
