@@ -37,7 +37,7 @@ class TemperatureCrewBuilder:
             print(f"❌ Error while extracting city name: {e}")
             raise
 
-    def _create_researcher(self, user_input, available_info):
+    def _agent_weather_info(self, user_input, available_info):
         return Agent(
             role='Researcher',
             goal=(
@@ -47,6 +47,23 @@ class TemperatureCrewBuilder:
             ),
             backstory='An expert weather analyst with 10 years of experience.',
             llm=self.llm
+        )
+    
+    def _weather_info_task(self, user_input, weather_data):
+        weather_info_extracter_agent = self._agent_weather_info(user_input, weather_data['messages'][-1])
+        return Task(
+            description="Analyze the weather information and provide a concise summary for the user query.",
+            expected_output="A short summary (2-3 lines) describing the current weather conditions in the specified city.",
+            agent=weather_info_extracter_agent
+        )
+
+    def _assemble_crew(self):
+        weather_agent = self._agent_weather_info(user_input, weather_data)
+        weather_task = self._weather_info_task(user_input, weather_data)
+        return Crew(
+            agents=[weather_agent],
+            tasks=[weather_task],
+            verbose=True
         )
 
     def _fetch_weather(self, state: dict):
@@ -94,9 +111,9 @@ if __name__ == "__main__":
     # Step 3: Fetch weather (mocked or real)
     weather_data = crew_runner._fetch_weather(updated_state)
 
-    # Step 4: Create research agent
-    researcher = crew_runner._create_researcher(user_input, weather_data['messages'][-1])
-
+   
+    crew_result = crew_runner._assemble_crew()    
+    final_result = crew_result.kickoff()
     # Output for now
     print("\n📦 Final Weather Info:\n", weather_data['messages'][-1])
-    print("\n🤖 Research Agent:\n", researcher)
+    print("\n🤖 Weather Info Agent:\n", final_result)
