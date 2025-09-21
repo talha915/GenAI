@@ -93,13 +93,13 @@ class DatabaseAgent:
         state["relevance"] = relevance.relevance
         print(f"Relevance determined: {state['relevance']}")
         if relevance.relevance == "relevant":
-            return "database"
+            return "convert_to_sql"
         else:
             return "knowledge_base"   
 
 
     def convert_nl_to_sql(self, state: GraphState):
-        question = state["question"]
+        question = state["query"]
         system_prompt = self.prompts["convert_to_sql"]["system"]
         convert_prompt = ChatPromptTemplate.from_messages(
             [
@@ -206,7 +206,7 @@ class DatabaseAgent:
 
 
     def regenerate_query(self, state: GraphState):
-        question = state["question"]
+        question = state["query"]
         print("Regenerating the SQL query by rewriting the question.")
         system = self.prompts["regenerate_query"]["system"]
         rewrite_prompt = ChatPromptTemplate.from_messages(
@@ -222,7 +222,7 @@ class DatabaseAgent:
         structured_llm = self.groq_llm.with_structured_output(RewrittenQuestion)
         rewriter = rewrite_prompt | structured_llm
         rewritten = rewriter.invoke({})
-        state["question"] = rewritten.question
+        state["query"] = rewritten.question
         state["attempts"] += 1
         print(f"Rewritten question: {state['question']}")
         return state
