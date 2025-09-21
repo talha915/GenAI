@@ -5,7 +5,7 @@ st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", ["Ingestion", "Chatbot", "Documents"])
 
 # --- Main app content ---
-st.title("📌 Streamlit Multi-Page App")
+st.title("📌 Document Ingestion Chatbot")
 
 if page == "Ingestion":
     st.header("📥 Data Ingestion")

@@ -1,4 +1,4 @@
-from langchain_community.vectorstores import Chroma
+from langchain.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain.chains import RetrievalQA
@@ -31,7 +31,7 @@ class RAGQueryEngine:
             print("✅ Chroma index loaded.")
 
             # Create retriever
-            self.retriever = self.vectorstore.as_retriever(search_kwargs={"k": 5})
+            self.retriever = self.vectorstore.as_retriever(search_kwargs={"k": 2})
 
             # Initialize LLM
             self.llm = ChatGroq(
