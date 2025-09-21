@@ -1,23 +1,18 @@
 from fastapi import Form, HTTPException, APIRouter
 from fastapi.responses import JSONResponse
 from langgraph.graph import StateGraph, END
-from typing_extensions import TypedDict
 
-from app.core.query import RAGQueryEngine
+from app.core.kb_query import RAGQueryEngine
+from app.core.db_agent import DatabaseAgent
+from app.core.models import GraphState
 
 router = APIRouter()
-
-# --- Graph state ---
-class GraphState(TypedDict):
-    query: str
-    relevance: str
-    answer: str 
+db_agent = DatabaseAgent()
 
 # --- Knowledge Base Node ---
 def knowledge_base_agent(state: GraphState) -> dict:
     engine = RAGQueryEngine()
     result = engine.ask(state["query"])
-    print("KnowledgeBase agent called", result)
     return {"answer": result}
 
 # --- Database Node ---
@@ -46,6 +41,7 @@ def relevance_router(state: GraphState) -> str:
     else:
         state["relevance"] = "irrelevant"
         return "knowledge_base"
+    
 
 # --- Build Graph ---
 graph = StateGraph(GraphState)
@@ -58,7 +54,7 @@ graph.add_node("knowledge_base", knowledge_base_agent)
 # Conditional routing from router node
 graph.add_conditional_edges(
     "router",                 # router node
-    relevance_router,          # conditional function
+    lambda state: db_agent.check_relevance(state),      
     {
         "database": "database",
         "knowledge_base": "knowledge_base"
@@ -85,9 +81,8 @@ async def query_vectorstore(query: str = Form(...)):
     
     try:
         answer = app_graph.invoke(state)
-        print("ANSWER:", answer)
         return JSONResponse({
-            "results": answer,
+            "results": answer.get("answer"),
             "status_code": 200
         })
     except Exception as e:
