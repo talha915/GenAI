@@ -46,36 +46,86 @@ def relevance_router(state: GraphState) -> str:
 # --- Build Graph ---
 graph = StateGraph(GraphState)
 
-# Add nodes
-graph.add_node("router", router_node)
+# # Add nodes
+# graph.add_node("router", router_node)
+# graph.add_node("convert_to_sql", db_agent.convert_nl_to_sql)
+# graph.add_node("execute_sql", db_agent.execute_sql)
+# graph.add_node("generate_human_readable_answer", db_agent.generate_human_readable_answer)
+# graph.add_node("regenerate_query", db_agent.regenerate_query)
+# graph.add_node("generate_fallback_response", db_agent.generate_fallback_response)
+# graph.add_node("end_max_iterations", db_agent.end_max_iterations)
+# graph.add_node("knowledge_base", knowledge_base_agent)
+
+# # Conditional routing from router node based on DB relevance
+# graph.add_conditional_edges(
+#     "router",
+#     lambda state: db_agent.check_relevance(state),  # returns "convert_to_sql" or "knowledge_base"
+#     {
+#         "convert_to_sql": "convert_to_sql",
+#         "knowledge_base": "knowledge_base"
+#     }
+# )
+
+# # Connect DB workflow nodes
+# graph.add_edge("convert_to_sql", "execute_sql")
+# graph.add_edge("execute_sql", "generate_human_readable_answer")
+# graph.add_edge("generate_human_readable_answer", END)
+# graph.add_edge("regenerate_query", "convert_to_sql")
+# graph.add_edge("generate_fallback_response", END)
+# graph.add_edge("end_max_iterations", END)
+
+# # Entry point
+# graph.set_entry_point("router")
+
+graph.add_node("check_relevance", db_agent.check_relevance)
 graph.add_node("convert_to_sql", db_agent.convert_nl_to_sql)
 graph.add_node("execute_sql", db_agent.execute_sql)
 graph.add_node("generate_human_readable_answer", db_agent.generate_human_readable_answer)
 graph.add_node("regenerate_query", db_agent.regenerate_query)
 graph.add_node("generate_fallback_response", db_agent.generate_fallback_response)
 graph.add_node("end_max_iterations", db_agent.end_max_iterations)
-graph.add_node("knowledge_base", knowledge_base_agent)
+graph.add_node("knowledge_base", knowledge_base_agent) 
 
-# Conditional routing from router node based on DB relevance
+# Add edges
 graph.add_conditional_edges(
-    "router",
-    lambda state: db_agent.check_relevance(state),  # returns "convert_to_sql" or "knowledge_base"
+    "check_relevance",
+    lambda state: db_agent.relevance_router(state),
     {
+        "knowledge_base": "knowledge_base",               
         "convert_to_sql": "convert_to_sql",
-        "knowledge_base": "knowledge_base"
+        "generate_fallback_response": "generate_fallback_response",
     }
 )
 
-# Connect DB workflow nodes
 graph.add_edge("convert_to_sql", "execute_sql")
-graph.add_edge("execute_sql", "generate_human_readable_answer")
+
+graph.add_conditional_edges(
+    "execute_sql",
+    lambda state: db_agent.execute_sql_router(state),
+    {
+        "generate_human_readable_answer": "generate_human_readable_answer",
+        "regenerate_query": "regenerate_query",
+    }
+)
+
+graph.add_conditional_edges(
+    "regenerate_query",
+    lambda state: db_agent.check_attempts_router(state),
+    {
+        "convert_to_sql": "convert_to_sql",
+        "max_iterations": "end_max_iterations",
+    }
+)
+
+# Terminal paths
 graph.add_edge("generate_human_readable_answer", END)
-graph.add_edge("regenerate_query", "convert_to_sql")
 graph.add_edge("generate_fallback_response", END)
 graph.add_edge("end_max_iterations", END)
+graph.add_edge("knowledge_base", END)
 
-# Entry point
-graph.set_entry_point("router")
+# Entry
+graph.set_entry_point("check_relevance")
+
 
 # Compile graph
 app_graph = graph.compile()

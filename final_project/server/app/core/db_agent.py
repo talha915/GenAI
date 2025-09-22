@@ -92,10 +92,11 @@ class DatabaseAgent:
         relevance = relevance_checker.invoke({})
         state["relevance"] = relevance.relevance
         print(f"Relevance determined: {state['relevance']}")
-        if relevance.relevance == "relevant":
-            return "convert_to_sql"
-        else:
-            return "knowledge_base"   
+        return state
+        # if relevance.relevance == "relevant":
+        #     return "convert_to_sql"
+        # else:
+        #     return "knowledge_base"   
 
 
     def convert_nl_to_sql(self, state: GraphState):
@@ -227,30 +228,30 @@ class DatabaseAgent:
         print(f"Rewritten question: {state['question']}")
         return state
 
-    def generate_fallback_response(state: GraphState):
+    def generate_fallback_response(self, state: GraphState):
         print("LLM could not find an answer. Returning fallback response.")
         state["query_result"] = "Sorry, I don't know the answer to that."
         return state
     
 
-    def end_max_iterations(state: GraphState):
+    def end_max_iterations(self, state: GraphState):
         state["query_result"] = "Please try again."
         print("Maximum attempts reached. Ending the workflow.")
         return state
     
-    def relevance_router(state: GraphState):
+    def relevance_router(self, state: GraphState):
         if state["relevance"].lower() == "relevant":
             return "convert_to_sql"
         else:
-            return "generate_fallback_response"
+            return "knowledge_base"
         
-    def check_attempts_router(state: GraphState):
+    def check_attempts_router(self, state: GraphState):
         if state["attempts"] < 3:
             return "convert_to_sql"
         else:
             return "end_max_iterations"  
 
-    def execute_sql_router(state: GraphState):
+    def execute_sql_router(self, state: GraphState):
         if not state.get("sql_error", False):
             return "generate_human_readable_answer"
         else:
