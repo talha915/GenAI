@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 import os
 
 # Importing classes
-from app.core.build_index import BuildRag
+from app.core.knowledge_base import BuildRag
 
 router = APIRouter()
 
