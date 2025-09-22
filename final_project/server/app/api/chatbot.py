@@ -46,37 +46,7 @@ def relevance_router(state: GraphState) -> str:
 # --- Build Graph ---
 graph = StateGraph(GraphState)
 
-# # Add nodes
-# graph.add_node("router", router_node)
-# graph.add_node("convert_to_sql", db_agent.convert_nl_to_sql)
-# graph.add_node("execute_sql", db_agent.execute_sql)
-# graph.add_node("generate_human_readable_answer", db_agent.generate_human_readable_answer)
-# graph.add_node("regenerate_query", db_agent.regenerate_query)
-# graph.add_node("generate_fallback_response", db_agent.generate_fallback_response)
-# graph.add_node("end_max_iterations", db_agent.end_max_iterations)
-# graph.add_node("knowledge_base", knowledge_base_agent)
-
-# # Conditional routing from router node based on DB relevance
-# graph.add_conditional_edges(
-#     "router",
-#     lambda state: db_agent.check_relevance(state),  # returns "convert_to_sql" or "knowledge_base"
-#     {
-#         "convert_to_sql": "convert_to_sql",
-#         "knowledge_base": "knowledge_base"
-#     }
-# )
-
-# # Connect DB workflow nodes
-# graph.add_edge("convert_to_sql", "execute_sql")
-# graph.add_edge("execute_sql", "generate_human_readable_answer")
-# graph.add_edge("generate_human_readable_answer", END)
-# graph.add_edge("regenerate_query", "convert_to_sql")
-# graph.add_edge("generate_fallback_response", END)
-# graph.add_edge("end_max_iterations", END)
-
-# # Entry point
-# graph.set_entry_point("router")
-
+# Add nodes
 graph.add_node("check_relevance", db_agent.check_relevance)
 graph.add_node("convert_to_sql", db_agent.convert_nl_to_sql)
 graph.add_node("execute_sql", db_agent.execute_sql)
@@ -140,9 +110,8 @@ async def query_vectorstore(query: str = Form(...)):
     
     try:
         answer = app_graph.invoke(state)
-        print("HERE IS ANSWER: ", answer)
         return JSONResponse({
-            "results": answer.get("query_result") or answer.get("answer"),
+            "results": answer,
             "status_code": 200
         })
     except Exception as e:
